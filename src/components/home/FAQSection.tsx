@@ -5,31 +5,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-const faqs = [
-  {
-    q: "Нужен ли опыт для прохождения курсов?",
-    a: "Нет! Все курсы рассчитаны на начинающих. Мы начинаем с основ и постепенно переходим к продвинутым темам.",
-  },
-  {
-    q: "Как долго доступен курс?",
-    a: "Доступ бессрочный. После записи вы можете проходить материалы в любое время и в своём темпе.",
-  },
-  {
-    q: "Получу ли я сертификат?",
-    a: "Да, после завершения курса на Stepik вы получите сертификат, которым можно поделиться в LinkedIn или с работодателями.",
-  },
-  {
-    q: "Можно ли вернуть деньги?",
-    a: "Stepik предоставляет возврат в течение 14 дней после покупки.",
-  },
-  {
-    q: "Как связаться с преподавателем?",
-    a: "Вы можете написать через страницу контактов на этом сайте или через систему сообщений Stepik.",
-  },
-];
+import { useFAQ } from "@/hooks/useFAQ";
 
 const FAQSection = () => {
+  const { faqs, isLoading } = useFAQ();
+
+  if (isLoading || faqs.length === 0) return null;
+
   return (
     <section className="border-t border-border/50 bg-card py-24">
       <div className="container max-w-3xl">
@@ -51,12 +33,12 @@ const FAQSection = () => {
         >
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`item-${i}`} className="border-border/50">
+              <AccordionItem key={faq.id} value={`item-${i}`} className="border-border/50">
                 <AccordionTrigger className="text-left font-display text-base font-medium hover:no-underline hover:text-primary">
-                  {faq.q}
+                  {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
-                  {faq.a}
+                  {faq.answer}
                 </AccordionContent>
               </AccordionItem>
             ))}

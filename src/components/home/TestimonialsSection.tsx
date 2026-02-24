@@ -1,31 +1,13 @@
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-const testimonials = [
-  {
-    name: "Daniil",
-    text: "лучшие для новичков",
-    rating: 5,
-  },
-  {
-    name: "Анастасия",
-    text: "все понравилось.",
-    rating: 5,
-  },
-  {
-    name: "Andrey Tarasov",
-    text: "Если вы только начинаете работать с Telegram или хотите оживить свой канал — очень рекомендую этот курс. Всё объяснено простым языком, есть задания и шаблоны, которые экономят время. Я получил не только знания, но и конкретные инструменты, которые уже приносят результат.",
-    rating: 5,
-  },
-  {
-    name: "Ольга Бабаева",
-    text: "Научилась тому, что стоит в названии курса. Доступно и понятно. А главное, полезно. Курс рекомендовали. Не разочаровалась",
-    rating: 5,
-  },
-];
+import { useTestimonials } from "@/hooks/useTestimonials";
 
 const TestimonialsSection = () => {
+  const { testimonials, isLoading } = useTestimonials();
+
+  if (isLoading || testimonials.length === 0) return null;
+
   return (
     <section className="py-24">
       <div className="container">
@@ -46,7 +28,7 @@ const TestimonialsSection = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {testimonials.map((t, i) => (
             <motion.div
-              key={t.name}
+              key={t.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
