@@ -1,45 +1,42 @@
 
 
-# Phase 2: Individual Course Pages
+# Integrate Spline + Spotlight Components
 
-## What will be built
-Three detailed course pages at `/courses/excel`, `/courses/web-dev`, and `/courses/telegram-smm`, plus a `/courses` index page listing all three. Each page follows the same template structure but with unique content.
+## Current State
+- `SplineScene` already exists at `src/components/SplineScene.tsx` (works, but not in `/ui` folder)
+- `Card` component already exists at `src/components/ui/card.tsx` (complete)
+- All NPM dependencies (`@splinetool/runtime`, `@splinetool/react-spline`, `framer-motion`) are already installed
+- `animate-spotlight` keyframe is missing from Tailwind config
 
-## Content Source
-- **Telegram SMM**: Using the detailed Russian-language description you provided (will be kept in Russian).
-- **Excel & Web Dev**: Placeholder content in a similar style (you can replace it later or provide descriptions like you did for SMM).
+## Changes
 
-## Page Structure (each course page)
+### 1. Create `src/components/ui/splite.tsx`
+Copy the provided `SplineScene` component into the `ui` folder as a named export. The existing `src/components/SplineScene.tsx` will remain for backward compatibility (it's used by `HeroSection.tsx`).
 
-1. **Hero banner** -- Course title, short tagline, and "Enroll on Stepik" CTA button
-2. **Why this course** -- Key benefits with icons (from the description you provided)
-3. **Target audience** -- Who the course is for, listed with bullet points
-4. **Requirements** -- What students need before starting
-5. **Curriculum outline** -- Expandable accordion sections showing modules/topics
-6. **Testimonials** -- Course-specific student reviews (cards)
-7. **FAQ** -- Course-specific questions in accordion format
-8. **Bottom CTA** -- Final enrollment call-to-action
+### 2. Create `src/components/ui/spotlight.tsx`
+Use the **Aceternity** version (SVG-based spotlight with the `animate-spotlight` class). This is the simpler, dependency-free version that pairs well with the demo component.
 
-## Routes & Navigation
+### 3. Update `tailwind.config.ts`
+Add the `spotlight` keyframe animation:
+```
+keyframes: {
+  spotlight: {
+    "0%": { opacity: "0", transform: "translate(-72%, -62%) scale(0.5)" },
+    "100%": { opacity: "1", transform: "translate(-50%,-40%) scale(1)" },
+  },
+}
+animation: {
+  spotlight: "spotlight 2s ease .75s 1 forwards",
+}
+```
 
-- `/courses` -- Grid of all 3 course cards (reuses the existing CourseCards style)
-- `/courses/:slug` -- Dynamic route rendering the correct course data
+### 4. Create `src/components/ui/demo.tsx`
+The demo component showcasing the Spline scene inside a Card with Spotlight effect. This serves as a reusable example/showcase component.
 
-## Files to create/modify
+### 5. No changes to `card.tsx`
+The existing card component is already complete and matches what's needed.
 
-| File | Action |
-|------|--------|
-| `src/data/courses.ts` | New -- centralized course data (title, description, audience, curriculum, testimonials, FAQ) for all 3 courses |
-| `src/pages/CoursePage.tsx` | New -- dynamic course detail page component |
-| `src/pages/Courses.tsx` | New -- courses listing page |
-| `src/App.tsx` | Edit -- add `/courses` and `/courses/:slug` routes |
-
-## Technical Details
-
-- Course data will be stored in a single `src/data/courses.ts` file as a typed array, making it easy to later migrate to Supabase.
-- `CoursePage.tsx` will use `useParams()` to read the slug and look up course data.
-- If slug is not found, redirects to NotFound.
-- All sections use Framer Motion animations matching the homepage style.
-- Reuses existing UI components: Card, Accordion, Button.
-- Telegram SMM content will be in Russian as provided; Excel and Web Dev will have English placeholder content.
-
+## Technical Notes
+- The `'use client'` directives in the provided code are Next.js-specific and will be removed since this is a Vite project.
+- The existing `SplineScene` default export at `src/components/SplineScene.tsx` stays untouched so current imports (HeroSection) keep working.
+- The new `splite.tsx` in `/ui` uses a named export (`export function SplineScene`) matching the provided code.
