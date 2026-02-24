@@ -1,95 +1,45 @@
 
 
-# Personal Website for Online Course Instructor
+# Phase 2: Individual Course Pages
 
-## Overview
-A modern, conversion-focused personal website built with React + Supabase, featuring a 3D interactive hero section, three course landing pages, a markdown blog, and a secure admin panel. Dark blue/black/white SaaS-style design.
+## What will be built
+Three detailed course pages at `/courses/excel`, `/courses/web-dev`, and `/courses/telegram-smm`, plus a `/courses` index page listing all three. Each page follows the same template structure but with unique content.
 
----
+## Content Source
+- **Telegram SMM**: Using the detailed Russian-language description you provided (will be kept in Russian).
+- **Excel & Web Dev**: Placeholder content in a similar style (you can replace it later or provide descriptions like you did for SMM).
 
-## Phase 1: Foundation & Homepage
+## Page Structure (each course page)
 
-### Design System
-- Dark blue, black, and white color palette
-- SaaS-inspired card-based layout with subtle Framer Motion animations
-- Modern typography with smooth transitions
+1. **Hero banner** -- Course title, short tagline, and "Enroll on Stepik" CTA button
+2. **Why this course** -- Key benefits with icons (from the description you provided)
+3. **Target audience** -- Who the course is for, listed with bullet points
+4. **Requirements** -- What students need before starting
+5. **Curriculum outline** -- Expandable accordion sections showing modules/topics
+6. **Testimonials** -- Course-specific student reviews (cards)
+7. **FAQ** -- Course-specific questions in accordion format
+8. **Bottom CTA** -- Final enrollment call-to-action
 
-### Homepage Sections
-1. **3D Hero Section** — Spline interactive scene (lazy-loaded) with instructor positioning and primary CTA
-2. **Course Cards** — Three cards linking to individual course pages (Excel, Web Dev, Telegram SMM)
-3. **Benefits Section** — Why learn with this instructor
-4. **Testimonials Carousel** — Student reviews
-5. **FAQ Accordion** — Common questions
-6. **Final CTA** — Enrollment call-to-action
+## Routes & Navigation
 
-### Navigation
-- Sticky header with links to Home, Courses, Blog, Contact
-- Footer with social links
+- `/courses` -- Grid of all 3 course cards (reuses the existing CourseCards style)
+- `/courses/:slug` -- Dynamic route rendering the correct course data
 
----
+## Files to create/modify
 
-## Phase 2: Course Pages & Contact
+| File | Action |
+|------|--------|
+| `src/data/courses.ts` | New -- centralized course data (title, description, audience, curriculum, testimonials, FAQ) for all 3 courses |
+| `src/pages/CoursePage.tsx` | New -- dynamic course detail page component |
+| `src/pages/Courses.tsx` | New -- courses listing page |
+| `src/App.tsx` | Edit -- add `/courses` and `/courses/:slug` routes |
 
-### Dynamic Course Pages (3 pages)
-Each course page includes:
-- Hero headline and description
-- Target audience section
-- Skills gained list
-- Curriculum outline
-- Course-specific testimonials and FAQ
-- CTA button linking to the external Stepik course
+## Technical Details
 
-**Courses:**
-- Microsoft Excel Specialist → stepik.org/a/244450
-- Web Development (CMS) → stepik.org/139723
-- Telegram SMM → stepik.org/a/231903
-
-### Contact Page
-- Contact form with input validation and anti-spam (honeypot field)
-- Success/error states
-- Form submissions stored in Supabase
-
----
-
-## Phase 3: Supabase Backend & Admin Panel
-
-### Database Setup (Supabase)
-Tables: courses, blog_posts, testimonials, faq, settings (site-wide text/links), contact_submissions, page_views
-
-### Authentication
-- Single admin user with email/password login via Supabase Auth
-- Protected `/admin` routes
-- Role stored in a `user_roles` table (admin role)
-
-### Admin Dashboard
-- Sidebar navigation
-- **Homepage Editor** — Edit hero text, benefits, CTA links
-- **Course Manager** — Edit course details (title, description, curriculum, links)
-- **Blog Manager** — CRUD with markdown editor
-- **Testimonials Manager** — Add/edit/delete testimonials
-- **FAQ Manager** — Add/edit/delete FAQ items
-- **Settings** — Social links, meta titles/descriptions
-- **Basic Analytics** — Page view counter display
-
----
-
-## Phase 4: Blog
-
-### Blog List Page
-- Paginated list of blog posts with title, excerpt, date
-- SEO-friendly URLs using slugs (e.g., `/blog/my-post-title`)
-
-### Blog Detail Page
-- Markdown rendered to HTML
-- Meta tags for SEO (title, description, OpenGraph)
-
----
-
-## Phase 5: SEO & Polish
-
-- Editable meta title and description per page (stored in DB)
-- OpenGraph tags for social sharing
-- `robots.txt` and basic sitemap
-- Performance optimization (lazy loading, image optimization)
-- Mobile-responsive design throughout
+- Course data will be stored in a single `src/data/courses.ts` file as a typed array, making it easy to later migrate to Supabase.
+- `CoursePage.tsx` will use `useParams()` to read the slug and look up course data.
+- If slug is not found, redirects to NotFound.
+- All sections use Framer Motion animations matching the homepage style.
+- Reuses existing UI components: Card, Accordion, Button.
+- Telegram SMM content will be in Russian as provided; Excel and Web Dev will have English placeholder content.
 
