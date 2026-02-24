@@ -22,6 +22,7 @@ const Footer = () => {
               <Link to="/courses" className="text-sm text-muted-foreground transition-colors hover:text-primary">Курсы</Link>
               <Link to="/blog" className="text-sm text-muted-foreground transition-colors hover:text-primary">Блог</Link>
               <Link to="/contact" className="text-sm text-muted-foreground transition-colors hover:text-primary">Контакты</Link>
+              <a href="https://t.me/nigismo" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">Telegram: @nigismo</a>
             </nav>
           </div>
 
