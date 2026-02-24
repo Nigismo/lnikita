@@ -50,6 +50,111 @@ export type Database = {
         }
         Relationships: []
       }
+      courses: {
+        Row: {
+          audience: Json
+          benefits: Json
+          course_faq: Json
+          course_testimonials: Json
+          created_at: string
+          curriculum: Json
+          description: string
+          icon_name: string
+          id: string
+          link: string
+          requirements: Json
+          slug: string
+          sort_order: number
+          tagline: string
+          title: string
+        }
+        Insert: {
+          audience?: Json
+          benefits?: Json
+          course_faq?: Json
+          course_testimonials?: Json
+          created_at?: string
+          curriculum?: Json
+          description?: string
+          icon_name?: string
+          id?: string
+          link?: string
+          requirements?: Json
+          slug: string
+          sort_order?: number
+          tagline?: string
+          title: string
+        }
+        Update: {
+          audience?: Json
+          benefits?: Json
+          course_faq?: Json
+          course_testimonials?: Json
+          created_at?: string
+          curriculum?: Json
+          description?: string
+          icon_name?: string
+          id?: string
+          link?: string
+          requirements?: Json
+          slug?: string
+          sort_order?: number
+          tagline?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      faq: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question: string
+          sort_order: number
+        }
+        Insert: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question: string
+          sort_order?: number
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          rating: number
+          sort_order: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          rating?: number
+          sort_order?: number
+          text?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          rating?: number
+          sort_order?: number
+          text?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
