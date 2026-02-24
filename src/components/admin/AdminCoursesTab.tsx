@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCourses, CourseDB } from "@/hooks/useCourses";
+import { useCourses, CourseDB, CourseBenefitDB, CourseAudienceDB, CurriculumModuleDB, CourseTestimonialDB, CourseFAQDB } from "@/hooks/useCourses";
 import { availableIcons } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -15,16 +16,39 @@ import {
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const emptyForm = {
+import BenefitsEditor from "./course-editors/BenefitsEditor";
+import AudienceEditor from "./course-editors/AudienceEditor";
+import RequirementsEditor from "./course-editors/RequirementsEditor";
+import CurriculumEditor from "./course-editors/CurriculumEditor";
+import TestimonialsEditor from "./course-editors/TestimonialsEditor";
+import FAQEditor from "./course-editors/FAQEditor";
+
+interface CourseForm {
+  slug: string;
+  title: string;
+  tagline: string;
+  description: string;
+  icon_name: string;
+  link: string;
+  sort_order: number;
+  benefits: CourseBenefitDB[];
+  audience: CourseAudienceDB[];
+  requirements: string[];
+  curriculum: CurriculumModuleDB[];
+  course_testimonials: CourseTestimonialDB[];
+  course_faq: CourseFAQDB[];
+}
+
+const emptyForm: CourseForm = {
   slug: "", title: "", tagline: "", description: "", icon_name: "BookOpen", link: "",
-  benefits: "[]", audience: "[]", requirements: "[]", curriculum: "[]",
-  course_testimonials: "[]", course_faq: "[]", sort_order: 0,
+  benefits: [], audience: [], requirements: [], curriculum: [],
+  course_testimonials: [], course_faq: [], sort_order: 0,
 };
 
 export default function AdminCoursesTab() {
   const { courses, addCourse, updateCourse, deleteCourse } = useCourses();
   const [editing, setEditing] = useState<string | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState<CourseForm>(emptyForm);
 
   const resetForm = () => {
     setForm({ ...emptyForm, sort_order: courses.length });
@@ -35,14 +59,9 @@ export default function AdminCoursesTab() {
     setEditing(c.id);
     setForm({
       slug: c.slug, title: c.title, tagline: c.tagline, description: c.description,
-      icon_name: c.icon_name, link: c.link,
-      benefits: JSON.stringify(c.benefits, null, 2),
-      audience: JSON.stringify(c.audience, null, 2),
-      requirements: JSON.stringify(c.requirements, null, 2),
-      curriculum: JSON.stringify(c.curriculum, null, 2),
-      course_testimonials: JSON.stringify(c.course_testimonials, null, 2),
-      course_faq: JSON.stringify(c.course_faq, null, 2),
-      sort_order: c.sort_order,
+      icon_name: c.icon_name, link: c.link, sort_order: c.sort_order,
+      benefits: c.benefits, audience: c.audience, requirements: c.requirements,
+      curriculum: c.curriculum, course_testimonials: c.course_testimonials, course_faq: c.course_faq,
     });
   };
 
@@ -52,26 +71,11 @@ export default function AdminCoursesTab() {
       return;
     }
     try {
-      const payload = {
-        slug: form.slug,
-        title: form.title,
-        tagline: form.tagline,
-        description: form.description,
-        icon_name: form.icon_name,
-        link: form.link,
-        benefits: JSON.parse(form.benefits),
-        audience: JSON.parse(form.audience),
-        requirements: JSON.parse(form.requirements),
-        curriculum: JSON.parse(form.curriculum),
-        course_testimonials: JSON.parse(form.course_testimonials),
-        course_faq: JSON.parse(form.course_faq),
-        sort_order: form.sort_order,
-      };
       if (editing) {
-        await updateCourse(editing, payload);
+        await updateCourse(editing, form);
         toast({ title: "Курс обновлён" });
       } else {
-        await addCourse(payload);
+        await addCourse(form);
         toast({ title: "Курс добавлен" });
       }
       resetForm();
@@ -90,7 +94,8 @@ export default function AdminCoursesTab() {
   };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
+    <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+      {/* Course list */}
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Курсы</CardTitle>
@@ -139,7 +144,8 @@ export default function AdminCoursesTab() {
         </CardContent>
       </Card>
 
-      <Card className="max-h-[80vh] overflow-y-auto">
+      {/* Course form */}
+      <Card className="max-h-[85vh] overflow-y-auto">
         <CardHeader>
           <CardTitle>{editing ? "Редактировать курс" : "Новый курс"}</CardTitle>
         </CardHeader>
@@ -160,49 +166,68 @@ export default function AdminCoursesTab() {
             <Label>Описание</Label>
             <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
-          <div className="space-y-2">
-            <Label>Иконка</Label>
-            <Select value={form.icon_name} onValueChange={(v) => setForm({ ...form, icon_name: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {availableIcons.map((name) => (
-                  <SelectItem key={name} value={name}>{name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Иконка</Label>
+              <Select value={form.icon_name} onValueChange={(v) => setForm({ ...form, icon_name: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {availableIcons.map((name) => (
+                    <SelectItem key={name} value={name}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Порядок</Label>
+              <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Ссылка (Stepik)</Label>
             <Input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
           </div>
-          <div className="space-y-2">
-            <Label>Порядок</Label>
-            <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} />
-          </div>
-          <div className="space-y-2">
-            <Label>Преимущества (JSON)</Label>
-            <Textarea rows={4} className="font-mono text-xs" value={form.benefits} onChange={(e) => setForm({ ...form, benefits: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label>Аудитория (JSON)</Label>
-            <Textarea rows={4} className="font-mono text-xs" value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label>Требования (JSON)</Label>
-            <Textarea rows={3} className="font-mono text-xs" value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label>Программа (JSON)</Label>
-            <Textarea rows={4} className="font-mono text-xs" value={form.curriculum} onChange={(e) => setForm({ ...form, curriculum: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label>Отзывы курса (JSON)</Label>
-            <Textarea rows={3} className="font-mono text-xs" value={form.course_testimonials} onChange={(e) => setForm({ ...form, course_testimonials: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label>FAQ курса (JSON)</Label>
-            <Textarea rows={3} className="font-mono text-xs" value={form.course_faq} onChange={(e) => setForm({ ...form, course_faq: e.target.value })} />
-          </div>
+
+          {/* Visual editors in accordion */}
+          <Accordion type="multiple" className="w-full">
+            <AccordionItem value="benefits">
+              <AccordionTrigger>Преимущества ({form.benefits.length})</AccordionTrigger>
+              <AccordionContent>
+                <BenefitsEditor value={form.benefits} onChange={(v) => setForm({ ...form, benefits: v })} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="audience">
+              <AccordionTrigger>Аудитория ({form.audience.length})</AccordionTrigger>
+              <AccordionContent>
+                <AudienceEditor value={form.audience} onChange={(v) => setForm({ ...form, audience: v })} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="requirements">
+              <AccordionTrigger>Требования ({form.requirements.length})</AccordionTrigger>
+              <AccordionContent>
+                <RequirementsEditor value={form.requirements} onChange={(v) => setForm({ ...form, requirements: v })} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="curriculum">
+              <AccordionTrigger>Программа ({form.curriculum.length})</AccordionTrigger>
+              <AccordionContent>
+                <CurriculumEditor value={form.curriculum} onChange={(v) => setForm({ ...form, curriculum: v })} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="testimonials">
+              <AccordionTrigger>Отзывы ({form.course_testimonials.length})</AccordionTrigger>
+              <AccordionContent>
+                <TestimonialsEditor value={form.course_testimonials} onChange={(v) => setForm({ ...form, course_testimonials: v })} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="faq">
+              <AccordionTrigger>FAQ ({form.course_faq.length})</AccordionTrigger>
+              <AccordionContent>
+                <FAQEditor value={form.course_faq} onChange={(v) => setForm({ ...form, course_faq: v })} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
           <div className="flex gap-2">
             <Button onClick={handleSave} className="flex-1">{editing ? "Сохранить" : "Добавить"}</Button>
             {editing && <Button variant="outline" onClick={resetForm}>Отмена</Button>}
