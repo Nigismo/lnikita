@@ -1,138 +1,69 @@
 
 
-# Plan: Blog System Improvements
+# Визуальный редактор курсов
 
-This plan covers 5 major features: delete confirmation, publication status, SEO meta tags, improved Markdown rendering, and image support with file storage.
+## Что изменится
 
----
+Сейчас в админке для редактирования сложных полей курса (преимущества, аудитория, программа, отзывы, FAQ, требования) используются текстовые поля с сырым JSON. Это неудобно и подвержено ошибкам. Заменим их на визуальные формы с отдельными полями для каждого элемента.
 
-## 1. Database Changes
+## Какие секции получат визуальный редактор
 
-### Migration: Add columns and storage bucket
+1. **Преимущества** (benefits) -- иконка, заголовок, описание
+2. **Аудитория** (audience) -- эмодзи, заголовок, описание
+3. **Требования** (requirements) -- простой список строк
+4. **Программа** (curriculum) -- модуль с названием + список тем
+5. **Отзывы курса** (course_testimonials) -- имя, текст, рейтинг
+6. **FAQ курса** (course_faq) -- вопрос, ответ
 
-Add two new columns to `blog_posts`:
-- `published` (boolean, default `false`) -- draft/published status
-- `cover_image` (text, nullable) -- URL path to cover image in storage
+Каждая секция будет иметь кнопки "Добавить", "Удалить" и возможность редактировать каждое поле отдельно.
 
-Create a storage bucket `blog-images` (public) for uploading images within articles and cover images. Add RLS policies: public read, authenticated insert/delete.
+## Визуальная структура
 
-### Fix RLS policies
+Форма курса будет разделена на секции с помощью аккордеона (Accordion). Каждая секция раскрывается и показывает список карточек с полями:
 
-Change existing RESTRICTIVE policies to PERMISSIVE so they work correctly (currently all policies are restrictive, which means they AND together -- the SELECT policy being restrictive blocks writes even when the write policy passes).
-
----
-
-## 2. Delete Confirmation Dialog (Admin)
-
-- Import `AlertDialog` components already available in the project
-- Wrap the delete button in an `AlertDialog` with a confirmation message ("Are you sure you want to delete this article?")
-- Only call `deletePost` after user confirms
-
----
-
-## 3. Publication Status (Draft/Published)
-
-### Admin panel:
-- Add a `Switch` toggle in the article form for "Published" status
-- Display a badge (draft/published) next to each article title in the table
-- Include `published` field in `addPost` and `updatePost` calls
-
-### Blog (public pages):
-- Filter `useBlogPosts` on the public blog pages to only show `published = true` posts
-- In admin, show all posts regardless of status
-
-Update `useBlogPosts` hook to accept an optional `showDrafts` parameter.
-
----
-
-## 4. SEO Meta Tags
-
-Create a `useDocumentMeta` hook (or inline `useEffect`) that sets:
-- `document.title`
-- `<meta name="description">`
-- `<meta property="og:title">`
-- `<meta property="og:description">`
-- `<meta property="og:image">` (if cover image exists)
-
-Apply in:
-- `BlogPost.tsx` -- use post title/description
-- `Blog.tsx` -- static blog listing title
-
----
-
-## 5. Improved Markdown Rendering
-
-Replace the basic `renderContent` function with a proper Markdown component supporting:
-- **Bold** (`**text**`), *italic* (`*text*`), ~~strikethrough~~
-- [Links](url) with `[text](url)` syntax
-- Inline `code` and fenced code blocks (```)
-- Images via `![alt](url)` syntax
-- Simple tables (`| col | col |`)
-- Blockquotes (`>`)
-
-Implementation approach: Create a `MarkdownRenderer` component that parses content line-by-line with regex for inline formatting. No external library needed -- extend the existing pattern with regex replacements for inline elements and block-level detection for code blocks, tables, and blockquotes.
-
----
-
-## 6. Image Support (Cover + In-article)
-
-### Storage bucket:
-- Create `blog-images` bucket (public read)
-- RLS: anyone can read, authenticated users can upload/delete
-
-### Admin panel:
-- Add a file input for cover image upload
-- On file select, upload to `blog-images/{slug}/{filename}` via Supabase Storage SDK
-- Store the public URL in `cover_image` column
-- Add a button to copy image URL for pasting into Markdown content as `![alt](url)`
-
-### Blog display:
-- Show cover image at top of `BlogPost.tsx` article
-- Show cover image as thumbnail on `Blog.tsx` card list
-- Markdown `![alt](url)` renders as `<img>` tags
-
----
-
-## Technical Details
-
-### Files to create:
-- `src/components/MarkdownRenderer.tsx` -- reusable Markdown component
-- `src/hooks/useDocumentMeta.ts` -- SEO meta tag hook
-
-### Files to modify:
-- `src/pages/Admin.tsx` -- delete confirmation, status toggle, cover image upload, image URL copy
-- `src/pages/Blog.tsx` -- filter published posts, show cover images, SEO
-- `src/pages/BlogPost.tsx` -- use MarkdownRenderer, show cover image, SEO
-- `src/hooks/useBlogPosts.ts` -- add `showDrafts` parameter to query
-
-### Database migration SQL:
-```sql
--- Add columns
-ALTER TABLE public.blog_posts ADD COLUMN published boolean NOT NULL DEFAULT false;
-ALTER TABLE public.blog_posts ADD COLUMN cover_image text;
-
--- Fix RLS: drop restrictive, recreate as permissive
-DROP POLICY "Anyone can read blog posts" ON public.blog_posts;
-DROP POLICY "Authenticated users can delete blog posts" ON public.blog_posts;
-DROP POLICY "Authenticated users can insert blog posts" ON public.blog_posts;
-DROP POLICY "Authenticated users can update blog posts" ON public.blog_posts;
-
-CREATE POLICY "Anyone can read published posts" ON public.blog_posts FOR SELECT USING (true);
-CREATE POLICY "Auth users can insert posts" ON public.blog_posts FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "Auth users can update posts" ON public.blog_posts FOR UPDATE TO authenticated USING (true);
-CREATE POLICY "Auth users can delete posts" ON public.blog_posts FOR DELETE TO authenticated USING (true);
-
--- Storage bucket
-INSERT INTO storage.buckets (id, name, public) VALUES ('blog-images', 'blog-images', true);
-
-CREATE POLICY "Public read blog images" ON storage.objects FOR SELECT USING (bucket_id = 'blog-images');
-CREATE POLICY "Auth upload blog images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'blog-images');
-CREATE POLICY "Auth delete blog images" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'blog-images');
+```text
++-------------------------------+
+| Преимущества (3)          [v] |
++-------------------------------+
+| [Иконка: Star   ]            |
+| [Заголовок: _______________]  |
+| [Описание: ________________]  |
+|                    [Удалить]  |
+| ---                           |
+| [Иконка: Shield  ]           |
+| ...                           |
+|           [+ Добавить]        |
++-------------------------------+
+| Программа (5)             [>] |
++-------------------------------+
 ```
 
-### Data migration:
-Update existing posts to `published = true`:
-```sql
-UPDATE public.blog_posts SET published = true;
-```
+---
+
+## Технические детали
+
+### Новые компоненты (в `src/components/admin/course-editors/`)
+
+1. **BenefitsEditor.tsx** -- редактор массива `{icon, title, description}`, с выбором иконки из `availableIcons`
+2. **AudienceEditor.tsx** -- редактор массива `{emoji, title, description}`
+3. **RequirementsEditor.tsx** -- редактор массива строк
+4. **CurriculumEditor.tsx** -- редактор массива `{title, topics[]}`, где topics -- вложенный список строк с кнопками добавить/удалить
+5. **TestimonialsEditor.tsx** -- редактор массива `{name, text, rating}`
+6. **FAQEditor.tsx** -- редактор массива `{q, a}`
+
+Каждый компонент принимает `value: T[]` и `onChange: (val: T[]) => void`.
+
+### Изменения в AdminCoursesTab.tsx
+
+- Состояние формы изменится: вместо строк JSON (`benefits: "[]"`) будут хранить типизированные массивы (`benefits: []`)
+- Убираем все `<Textarea>` для JSON-полей, заменяем на визуальные компоненты
+- Убираем `JSON.parse / JSON.stringify` из `handleSave` и `startEdit` для этих полей
+- Секции сложных полей оборачиваются в `Accordion` для компактности
+- Форма станет шире: макет сменится с `lg:grid-cols-[1fr_420px]` на `lg:grid-cols-[1fr_1fr]` или полноширинную форму
+
+### Без изменений
+
+- Хук `useCourses.ts` -- без изменений, интерфейсы уже типизированы
+- База данных -- без изменений, структура JSONB остается прежней
+- Публичные страницы -- без изменений
 
