@@ -4,21 +4,23 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const testimonials = [
   {
-    name: "Anna K.",
-    course: "Microsoft Excel",
-    text: "This course transformed how I work with data. I went from struggling with basic formulas to building complex dashboards.",
+    name: "Daniil",
+    text: "лучшие для новичков",
     rating: 5,
   },
   {
-    name: "Dmitry S.",
-    course: "Web Development",
-    text: "I built my first website within two weeks. The step-by-step approach made it incredibly easy to follow along.",
+    name: "Анастасия",
+    text: "все понравилось.",
     rating: 5,
   },
   {
-    name: "Maria P.",
-    course: "Telegram SMM",
-    text: "My Telegram channel grew from 500 to 5,000 subscribers in just two months using the strategies from this course.",
+    name: "Andrey Tarasov",
+    text: "Если вы только начинаете работать с Telegram или хотите оживить свой канал — очень рекомендую этот курс. Всё объяснено простым языком, есть задания и шаблоны, которые экономят время. Я получил не только знания, но и конкретные инструменты, которые уже приносят результат.",
+    rating: 5,
+  },
+  {
+    name: "Ольга Бабаева",
+    text: "Научилась тому, что стоит в названии курса. Доступно и понятно. А главное, полезно. Курс рекомендовали. Не разочаровалась",
     rating: 5,
   },
 ];
@@ -34,14 +36,14 @@ const TestimonialsSection = () => {
           className="mb-14 text-center"
         >
           <h2 className="font-display text-3xl font-bold sm:text-4xl">
-            What Students Say
+            Отзывы студентов
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Hear from students who have completed our courses and achieved real results.
+            Реальные отзывы от студентов, прошедших наши курсы на Stepik.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
@@ -60,7 +62,6 @@ const TestimonialsSection = () => {
                   <p className="text-sm leading-relaxed text-muted-foreground">"{t.text}"</p>
                   <div className="mt-4 border-t border-border/50 pt-4">
                     <p className="text-sm font-semibold">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.course}</p>
                   </div>
                 </CardContent>
               </Card>
