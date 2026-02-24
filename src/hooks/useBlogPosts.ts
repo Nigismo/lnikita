@@ -1,45 +1,53 @@
-import { useState, useEffect, useCallback } from "react";
-import { BlogPost, defaultBlogPosts } from "@/data/blog-posts";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
-const STORAGE_KEY = "edupro-blog-posts";
-
-function loadPosts(): BlogPost[] {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return defaultBlogPosts;
-    }
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultBlogPosts));
-  return defaultBlogPosts;
-}
+export type BlogPost = Tables<"blog_posts">;
 
 export function useBlogPosts() {
-  const [posts, setPosts] = useState<BlogPost[]>(loadPosts);
+  const queryClient = useQueryClient();
 
-  const save = useCallback((updated: BlogPost[]) => {
-    setPosts(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  }, []);
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ["blog_posts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .order("date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  const addPost = useCallback((post: BlogPost) => {
-    save([post, ...loadPosts()]);
-  }, [save]);
+  const addMutation = useMutation({
+    mutationFn: async (post: TablesInsert<"blog_posts">) => {
+      const { error } = await supabase.from("blog_posts").insert(post);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["blog_posts"] }),
+  });
 
-  const updatePost = useCallback((slug: string, data: Partial<BlogPost>) => {
-    const current = loadPosts();
-    save(current.map((p) => (p.slug === slug ? { ...p, ...data } : p)));
-  }, [save]);
+  const updateMutation = useMutation({
+    mutationFn: async ({ slug, data }: { slug: string; data: Partial<BlogPost> }) => {
+      const { error } = await supabase.from("blog_posts").update(data).eq("slug", slug);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["blog_posts"] }),
+  });
 
-  const deletePost = useCallback((slug: string) => {
-    save(loadPosts().filter((p) => p.slug !== slug));
-  }, [save]);
+  const deleteMutation = useMutation({
+    mutationFn: async (slug: string) => {
+      const { error } = await supabase.from("blog_posts").delete().eq("slug", slug);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["blog_posts"] }),
+  });
 
-  const refresh = useCallback(() => {
-    setPosts(loadPosts());
-  }, []);
-
-  return { posts, addPost, updatePost, deletePost, refresh };
+  return {
+    posts,
+    isLoading,
+    addPost: addMutation.mutateAsync,
+    updatePost: (slug: string, data: Partial<BlogPost>) => updateMutation.mutateAsync({ slug, data }),
+    deletePost: deleteMutation.mutateAsync,
+  };
 }

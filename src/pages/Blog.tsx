@@ -5,7 +5,7 @@ import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { CalendarDays } from "lucide-react";
 
 const Blog = () => {
-  const { posts } = useBlogPosts();
+  const { posts, isLoading } = useBlogPosts();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -19,7 +19,9 @@ const Blog = () => {
             Полезные статьи по Excel, веб-разработке и цифровым навыкам.
           </p>
 
-          {posts.length === 0 ? (
+          {isLoading ? (
+            <p className="mt-12 text-center text-muted-foreground">Загрузка...</p>
+          ) : posts.length === 0 ? (
             <p className="mt-12 text-center text-muted-foreground">
               Пока нет статей. Загляните позже!
             </p>

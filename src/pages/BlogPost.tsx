@@ -11,14 +11,26 @@ function renderContent(content: string) {
     if (line.startsWith("# ")) return <h1 key={i} className="mt-6 mb-4 font-display text-2xl font-bold">{line.slice(2)}</h1>;
     if (line.startsWith("- ")) return <li key={i} className="ml-4 list-disc text-muted-foreground">{line.slice(2)}</li>;
     if (line.trim() === "") return <br key={i} />;
-    return <p key={i} className="text-muted-foreground leading-relaxed">{line.replace(/\*\*(.*?)\*\*/g, (_, t) => t).replace(/`(.*?)`/g, (_, t) => t)}</p>;
+    return <p key={i} className="text-muted-foreground leading-relaxed">{line}</p>;
   });
 }
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { posts } = useBlogPosts();
+  const { posts, isLoading } = useBlogPosts();
   const post = posts.find((p) => p.slug === slug);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1 container py-20 text-center">
+          <p className="text-muted-foreground">Загрузка...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!post) {
     return (

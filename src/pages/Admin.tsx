@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useBlogPosts } from "@/hooks/useBlogPosts";
-import { BlogPost } from "@/data/blog-posts";
+import { useState, useEffect } from "react";
+import { useBlogPosts, BlogPost } from "@/hooks/useBlogPosts";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,34 +9,53 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pencil, Trash2, Plus, LogOut } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-const ADMIN_PASSWORD = "edupro2024";
+import type { Session } from "@supabase/supabase-js";
 
 const Admin = () => {
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem("edupro-admin") === "1");
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { posts, addPost, updatePost, deletePost, refresh } = useBlogPosts();
+  const { posts, addPost, updatePost, deletePost } = useBlogPosts();
   const [editing, setEditing] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", slug: "", description: "", content: "", date: "" });
 
-  if (!authed) {
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center bg-background"><p>Загрузка...</p></div>;
+  }
+
+  if (!session) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Card className="w-full max-w-sm">
           <CardHeader><CardTitle>Вход в админ-панель</CardTitle></CardHeader>
           <CardContent>
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                if (password === ADMIN_PASSWORD) {
-                  sessionStorage.setItem("edupro-admin", "1");
-                  setAuthed(true);
-                } else {
-                  toast({ title: "Неверный пароль", variant: "destructive" });
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                  toast({ title: "Ошибка входа", description: error.message, variant: "destructive" });
                 }
               }}
               className="space-y-4"
             >
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="pwd">Пароль</Label>
                 <Input id="pwd" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -59,26 +78,32 @@ const Admin = () => {
     setForm({ title: post.title, slug: post.slug, description: post.description, content: post.content, date: post.date });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.title || !form.slug) {
       toast({ title: "Заполните заголовок и slug", variant: "destructive" });
       return;
     }
-    if (editing) {
-      updatePost(editing, form);
-      toast({ title: "Статья обновлена" });
-    } else {
-      addPost(form as BlogPost);
-      toast({ title: "Статья добавлена" });
+    try {
+      if (editing) {
+        await updatePost(editing, form);
+        toast({ title: "Статья обновлена" });
+      } else {
+        await addPost(form);
+        toast({ title: "Статья добавлена" });
+      }
+      resetForm();
+    } catch (err: any) {
+      toast({ title: "Ошибка", description: err.message, variant: "destructive" });
     }
-    resetForm();
-    refresh();
   };
 
-  const handleDelete = (slug: string) => {
-    deletePost(slug);
-    toast({ title: "Статья удалена" });
-    refresh();
+  const handleDelete = async (slug: string) => {
+    try {
+      await deletePost(slug);
+      toast({ title: "Статья удалена" });
+    } catch (err: any) {
+      toast({ title: "Ошибка удаления", description: err.message, variant: "destructive" });
+    }
   };
 
   return (
@@ -86,14 +111,13 @@ const Admin = () => {
       <header className="border-b border-border/50 bg-card">
         <div className="container flex h-14 items-center justify-between">
           <h1 className="font-display text-lg font-bold"><span className="text-primary">Edu</span>Pro Админ</h1>
-          <Button variant="ghost" size="sm" onClick={() => { sessionStorage.removeItem("edupro-admin"); setAuthed(false); }}>
+          <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
             <LogOut className="mr-1 h-4 w-4" /> Выйти
           </Button>
         </div>
       </header>
 
       <div className="container grid gap-8 py-8 lg:grid-cols-[1fr_380px]">
-        {/* Posts list */}
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Статьи блога</CardTitle>
@@ -128,7 +152,6 @@ const Admin = () => {
           </CardContent>
         </Card>
 
-        {/* Editor */}
         <Card>
           <CardHeader>
             <CardTitle>{editing ? "Редактировать статью" : "Новая статья"}</CardTitle>
