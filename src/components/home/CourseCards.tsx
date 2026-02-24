@@ -1,32 +1,9 @@
 import { motion } from "framer-motion";
-import { ArrowUpRight, Table2, Globe, Send } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
-const courses = [
-  {
-    slug: "excel",
-    title: "Microsoft Excel Specialist",
-    description: "Master spreadsheets, formulas, pivot tables, and data analysis for professional productivity.",
-    icon: Table2,
-    link: "https://stepik.org/a/244450",
-  },
-  {
-    slug: "web-dev",
-    title: "Web Development (CMS)",
-    description: "Build modern websites using content management systems — no coding experience required.",
-    icon: Globe,
-    link: "https://stepik.org/139723",
-  },
-  {
-    slug: "telegram-smm",
-    title: "Telegram SMM",
-    description: "Grow and monetize Telegram channels with proven social media marketing strategies.",
-    icon: Send,
-    link: "https://stepik.org/a/231903",
-  },
-];
+import { courses } from "@/data/courses";
 
 const CourseCards = () => {
   return (
@@ -61,7 +38,7 @@ const CourseCards = () => {
                     <course.icon className="h-6 w-6" />
                   </div>
                   <CardTitle className="font-display text-xl">{course.title}</CardTitle>
-                  <CardDescription className="text-muted-foreground">
+                  <CardDescription className="text-muted-foreground line-clamp-3">
                     {course.description}
                   </CardDescription>
                 </CardHeader>

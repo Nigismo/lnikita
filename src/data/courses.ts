@@ -47,7 +47,7 @@ export interface CourseData {
 export const courses: CourseData[] = [
   {
     slug: "telegram-smm",
-    title: "Telegram SMM",
+    title: "SMM в Telegram",
     tagline: "Рост канала, подписчики и монетизация",
     description:
       "Этот курс поможет вам создать и продвинуть Telegram-канал с нуля до стабильного роста аудитории и дохода. Вы получите пошаговую систему продвижения, основанную на актуальных методах SMM, и сможете применять её уже в процессе обучения.",
@@ -171,7 +171,7 @@ export const courses: CourseData[] = [
   },
   {
     slug: "excel",
-    title: "Microsoft Excel Specialist",
+    title: "Специалист по Microsoft Office: специалист по Excel",
     tagline: "From spreadsheets to professional data analysis",
     description:
       "Master Microsoft Excel from beginner to advanced level. Learn formulas, pivot tables, data visualization, and automation to boost your professional productivity.",
@@ -285,7 +285,7 @@ export const courses: CourseData[] = [
   },
   {
     slug: "web-dev",
-    title: "Web Development (CMS)",
+    title: "Веб-разработка (Content Management System)",
     tagline: "Build modern websites without coding",
     description:
       "Learn to build professional websites using content management systems. No coding experience required — go from zero to a fully functional website.",
