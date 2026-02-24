@@ -4,16 +4,20 @@ import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 export type BlogPost = Tables<"blog_posts">;
 
-export function useBlogPosts() {
+export function useBlogPosts(showDrafts = false) {
   const queryClient = useQueryClient();
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["blog_posts"],
+    queryKey: ["blog_posts", showDrafts],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("blog_posts")
         .select("*")
         .order("date", { ascending: false });
+      if (!showDrafts) {
+        query = query.eq("published", true);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
