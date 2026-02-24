@@ -49,7 +49,7 @@ const CoursePage = () => {
               <div className="mt-8">
                 <Button asChild size="lg">
                   <a href={course.link} target="_blank" rel="noopener noreferrer">
-                    Enroll on Stepik <ArrowUpRight className="ml-2 h-4 w-4" />
+                    Записаться на Stepik <ArrowUpRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
               </div>
@@ -66,7 +66,7 @@ const CoursePage = () => {
             >
               {course.slug === "telegram-smm"
                 ? "Почему этот курс эффективен?"
-                : "Why This Course?"}
+                : "Почему этот курс?"}
             </motion.h2>
             <div className={`grid gap-8 sm:grid-cols-2 ${course.benefits.length > 4 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
               {course.benefits.map((b, i) => (
@@ -94,7 +94,7 @@ const CoursePage = () => {
               {...fadeUp}
               className="mb-14 text-center font-display text-3xl font-bold sm:text-4xl"
             >
-              {course.slug === "telegram-smm" ? "Для кого этот курс" : "Who Is This For?"}
+              {course.slug === "telegram-smm" ? "Для кого этот курс" : "Для кого этот курс"}
             </motion.h2>
             <div className="space-y-6">
               {course.audience.map((a, i) => (
@@ -122,7 +122,7 @@ const CoursePage = () => {
               {...fadeUp}
               className="mb-10 text-center font-display text-3xl font-bold sm:text-4xl"
             >
-              {course.slug === "telegram-smm" ? "Начальные требования" : "Requirements"}
+              {course.slug === "telegram-smm" ? "Начальные требования" : "Начальные требования"}
             </motion.h2>
             <motion.ul {...fadeUp} className="space-y-4">
               {course.requirements.map((r, i) => (
@@ -142,7 +142,7 @@ const CoursePage = () => {
               {...fadeUp}
               className="mb-14 text-center font-display text-3xl font-bold sm:text-4xl"
             >
-              {course.slug === "telegram-smm" ? "Программа курса" : "Curriculum"}
+              {course.slug === "telegram-smm" ? "Программа курса" : "Программа курса"}
             </motion.h2>
             <motion.div {...fadeUp}>
               <Accordion type="single" collapsible className="w-full">
@@ -175,7 +175,7 @@ const CoursePage = () => {
               {...fadeUp}
               className="mb-14 text-center font-display text-3xl font-bold sm:text-4xl"
             >
-              {course.slug === "telegram-smm" ? "Отзывы студентов" : "What Students Say"}
+              {course.slug === "telegram-smm" ? "Отзывы студентов" : "Отзывы студентов"}
             </motion.h2>
             <div className="grid gap-6 md:grid-cols-3">
               {course.testimonials.map((t, i) => (
@@ -206,7 +206,7 @@ const CoursePage = () => {
               {...fadeUp}
               className="mb-14 text-center font-display text-3xl font-bold sm:text-4xl"
             >
-              {course.slug === "telegram-smm" ? "Часто задаваемые вопросы" : "FAQ"}
+              {course.slug === "telegram-smm" ? "Часто задаваемые вопросы" : "Часто задаваемые вопросы"}
             </motion.h2>
             <motion.div {...fadeUp}>
               <Accordion type="single" collapsible className="w-full">
@@ -235,17 +235,17 @@ const CoursePage = () => {
               <h2 className="font-display text-2xl font-bold sm:text-3xl">
                 {course.slug === "telegram-smm"
                   ? "Готовы начать?"
-                  : "Ready to Get Started?"}
+                  : "Готовы начать?"}
               </h2>
               <p className="mt-3 text-muted-foreground">
                 {course.slug === "telegram-smm"
                   ? "Присоединяйтесь к курсу и начните продвигать свой Telegram-канал уже сегодня."
-                  : `Enroll in ${course.title} today and start building real skills.`}
+                  : `Запишитесь на курс «${course.title}» и начните развивать навыки уже сегодня.`}
               </p>
               <div className="mt-8">
                 <Button asChild size="lg">
                   <a href={course.link} target="_blank" rel="noopener noreferrer">
-                    Enroll on Stepik <ArrowUpRight className="ml-2 h-4 w-4" />
+                    Записаться на Stepik <ArrowUpRight className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
               </div>

@@ -13,19 +13,19 @@ const CTASection = () => {
           className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-12 text-center md:p-20"
         >
           <h2 className="font-display text-3xl font-bold sm:text-4xl">
-            Ready to Start Learning?
+            Готовы начать обучение?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Join thousands of students who have already transformed their careers. Pick a course and begin today.
+            Присоединяйтесь к тысячам студентов, которые уже продвинули свою карьеру. Выберите курс и начните сегодня.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Button asChild size="lg">
               <a href="#courses">
-                Browse Courses <ArrowRight className="ml-2 h-4 w-4" />
+                Смотреть курсы <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <a href="/contact">Contact Me</a>
+              <a href="/contact">Связаться</a>
             </Button>
           </div>
 

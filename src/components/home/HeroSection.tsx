@@ -15,23 +15,23 @@ const HeroSection = () => {
           className="relative z-10"
         >
           <span className="mb-4 inline-block rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary">
-            Online Courses on Stepik
+            Онлайн-курсы на Stepik
           </span>
           <h1 className="font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Master New Skills.{" "}
-            <span className="text-primary">Advance Your Career.</span>
+            Освойте новые навыки.{" "}
+            <span className="text-primary">Продвиньте карьеру.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-            From Excel mastery to web development and digital marketing — practical courses designed for real-world results.
+            От Excel до веб-разработки и цифрового маркетинга — практические курсы для реальных результатов.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild size="lg">
               <a href="#courses">
-                Explore Courses <ArrowRight className="ml-2 h-4 w-4" />
+                Смотреть курсы <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <a href="/contact">Get in Touch</a>
+              <a href="/contact">Связаться</a>
             </Button>
           </div>
         </motion.div>

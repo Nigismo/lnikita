@@ -4,23 +4,23 @@ import { Zap, Users, Award, Clock } from "lucide-react";
 const benefits = [
   {
     icon: Zap,
-    title: "Practical Skills",
-    description: "Every lesson is built around real-world projects and immediately applicable knowledge.",
+    title: "Практические навыки",
+    description: "Каждый урок построен на реальных проектах и сразу применимых знаниях.",
   },
   {
     icon: Users,
-    title: "Community Support",
-    description: "Join a community of motivated learners. Get answers and share progress.",
+    title: "Поддержка сообщества",
+    description: "Присоединяйтесь к сообществу мотивированных студентов. Получайте ответы и делитесь прогрессом.",
   },
   {
     icon: Award,
-    title: "Certified Results",
-    description: "Earn a certificate on completion and showcase your skills to employers.",
+    title: "Сертификат по итогам",
+    description: "Получите сертификат после завершения и продемонстрируйте навыки работодателям.",
   },
   {
     icon: Clock,
-    title: "Learn at Your Pace",
-    description: "Lifetime access to all course materials. Study whenever and wherever you want.",
+    title: "Учитесь в своём темпе",
+    description: "Бессрочный доступ ко всем материалам. Учитесь когда и где удобно.",
   },
 ];
 
@@ -35,10 +35,10 @@ const BenefitsSection = () => {
           className="mb-14 text-center"
         >
           <h2 className="font-display text-3xl font-bold sm:text-4xl">
-            Why Learn With Me?
+            Почему учиться у нас?
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Courses designed by an industry professional with years of teaching experience.
+            Курсы от практикующего специалиста с многолетним опытом преподавания.
           </p>
         </motion.div>
 

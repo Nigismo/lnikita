@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
-  { label: "Home", path: "/" },
-  { label: "Courses", path: "/courses" },
-  { label: "Blog", path: "/blog" },
-  { label: "Contact", path: "/contact" },
+  { label: "Главная", path: "/" },
+  { label: "Курсы", path: "/courses" },
+  { label: "Блог", path: "/blog" },
+  { label: "Контакты", path: "/contact" },
 ];
 
 const Header = () => {
@@ -39,7 +39,7 @@ const Header = () => {
           ))}
           <Button asChild size="sm" className="ml-4">
             <a href="https://stepik.org/a/244450" target="_blank" rel="noopener noreferrer">
-              Enroll Now
+              Записаться
             </a>
           </Button>
         </nav>
@@ -80,7 +80,7 @@ const Header = () => {
               ))}
               <Button asChild size="sm" className="mt-2">
                 <a href="https://stepik.org/a/244450" target="_blank" rel="noopener noreferrer">
-                  Enroll Now
+                  Записаться
                 </a>
               </Button>
             </div>

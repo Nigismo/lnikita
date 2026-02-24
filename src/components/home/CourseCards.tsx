@@ -16,10 +16,10 @@ const CourseCards = () => {
           className="mb-14 text-center"
         >
           <h2 className="font-display text-3xl font-bold sm:text-4xl">
-            Featured Courses
+            Наши курсы
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Choose a course and start learning today. All courses are hosted on Stepik with lifetime access.
+            Выберите курс и начните обучение. Все курсы размещены на Stepik с бессрочным доступом.
           </p>
         </motion.div>
 
@@ -46,11 +46,11 @@ const CourseCards = () => {
                   <div className="flex gap-3">
                     <Button asChild size="sm">
                       <a href={course.link} target="_blank" rel="noopener noreferrer">
-                        Enroll <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                        Записаться <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                       </a>
                     </Button>
                     <Button asChild variant="ghost" size="sm">
-                      <Link to={`/courses/${course.slug}`}>Learn More</Link>
+                      <Link to={`/courses/${course.slug}`}>Подробнее</Link>
                     </Button>
                   </div>
                 </CardContent>
