@@ -17,28 +17,34 @@ export type Database = {
       blog_posts: {
         Row: {
           content: string
+          cover_image: string | null
           created_at: string
           date: string
           description: string
           id: string
+          published: boolean
           slug: string
           title: string
         }
         Insert: {
           content?: string
+          cover_image?: string | null
           created_at?: string
           date?: string
           description?: string
           id?: string
+          published?: boolean
           slug: string
           title: string
         }
         Update: {
           content?: string
+          cover_image?: string | null
           created_at?: string
           date?: string
           description?: string
           id?: string
+          published?: boolean
           slug?: string
           title?: string
         }
