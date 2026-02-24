@@ -1,42 +1,25 @@
 
 
-# Integrate Spline + Spotlight Components
+# Исправление: робот не следит за курсором
 
-## Current State
-- `SplineScene` already exists at `src/components/SplineScene.tsx` (works, but not in `/ui` folder)
-- `Card` component already exists at `src/components/ui/card.tsx` (complete)
-- All NPM dependencies (`@splinetool/runtime`, `@splinetool/react-spline`, `framer-motion`) are already installed
-- `animate-spotlight` keyframe is missing from Tailwind config
+## Проблема
+В `HeroSection.tsx` (строка 46) есть декоративный градиентный `div` с `absolute inset-0`, который полностью перекрывает Spline-сцену. Этот элемент перехватывает все события мыши (`mousemove`, `mouseenter` и т.д.), не давая им дойти до Spline-канваса. Именно поэтому робот не реагирует на курсор.
 
-## Changes
+## Решение
+Добавить `pointer-events-none` к градиентному оверлею, чтобы он пропускал события мыши насквозь к Spline-сцене.
 
-### 1. Create `src/components/ui/splite.tsx`
-Copy the provided `SplineScene` component into the `ui` folder as a named export. The existing `src/components/SplineScene.tsx` will remain for backward compatibility (it's used by `HeroSection.tsx`).
+## Изменения
 
-### 2. Create `src/components/ui/spotlight.tsx`
-Use the **Aceternity** version (SVG-based spotlight with the `animate-spotlight` class). This is the simpler, dependency-free version that pairs well with the demo component.
+### `src/components/home/HeroSection.tsx`
+Строка 46 -- добавить `pointer-events-none`:
 
-### 3. Update `tailwind.config.ts`
-Add the `spotlight` keyframe animation:
 ```
-keyframes: {
-  spotlight: {
-    "0%": { opacity: "0", transform: "translate(-72%, -62%) scale(0.5)" },
-    "100%": { opacity: "1", transform: "translate(-50%,-40%) scale(1)" },
-  },
-}
-animation: {
-  spotlight: "spotlight 2s ease .75s 1 forwards",
-}
+// Было:
+<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-transparent" />
+
+// Станет:
+<div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-transparent" />
 ```
 
-### 4. Create `src/components/ui/demo.tsx`
-The demo component showcasing the Spline scene inside a Card with Spotlight effect. This serves as a reusable example/showcase component.
+Одна строка, одно изменение -- градиент остаётся визуально, но больше не блокирует взаимодействие с 3D-сценой.
 
-### 5. No changes to `card.tsx`
-The existing card component is already complete and matches what's needed.
-
-## Technical Notes
-- The `'use client'` directives in the provided code are Next.js-specific and will be removed since this is a Vite project.
-- The existing `SplineScene` default export at `src/components/SplineScene.tsx` stays untouched so current imports (HeroSection) keep working.
-- The new `splite.tsx` in `/ui` uses a named export (`export function SplineScene`) matching the provided code.
