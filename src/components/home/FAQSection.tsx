@@ -8,24 +8,24 @@ import {
 
 const faqs = [
   {
-    q: "Do I need prior experience?",
-    a: "No! All courses are designed for beginners. We start from the basics and gradually build up to advanced topics.",
+    q: "Нужен ли опыт для прохождения курсов?",
+    a: "Нет! Все курсы рассчитаны на начинающих. Мы начинаем с основ и постепенно переходим к продвинутым темам.",
   },
   {
-    q: "How long do I have access to the course?",
-    a: "You get lifetime access. Once enrolled, you can revisit the materials anytime at your own pace.",
+    q: "Как долго доступен курс?",
+    a: "Доступ бессрочный. После записи вы можете проходить материалы в любое время и в своём темпе.",
   },
   {
-    q: "Will I get a certificate?",
-    a: "Yes, upon completing a course on Stepik you'll receive a certificate that you can share on LinkedIn or with employers.",
+    q: "Получу ли я сертификат?",
+    a: "Да, после завершения курса на Stepik вы получите сертификат, которым можно поделиться в LinkedIn или с работодателями.",
   },
   {
-    q: "Can I get a refund?",
-    a: "Stepik offers a refund policy within the first 14 days of enrollment if you're not satisfied with the course.",
+    q: "Можно ли вернуть деньги?",
+    a: "Stepik предоставляет возврат в течение 14 дней после покупки.",
   },
   {
-    q: "How do I contact the instructor?",
-    a: "You can reach out through the Contact page on this website or directly through Stepik's messaging system.",
+    q: "Как связаться с преподавателем?",
+    a: "Вы можете написать через страницу контактов на этом сайте или через систему сообщений Stepik.",
   },
 ];
 
@@ -40,7 +40,7 @@ const FAQSection = () => {
           className="mb-14 text-center"
         >
           <h2 className="font-display text-3xl font-bold sm:text-4xl">
-            Frequently Asked Questions
+            Часто задаваемые вопросы
           </h2>
         </motion.div>
 
