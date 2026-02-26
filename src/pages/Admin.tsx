@@ -17,6 +17,8 @@ import AdminFAQTab from "@/components/admin/AdminFAQTab";
 const Admin = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -32,8 +34,43 @@ const Admin = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) {
+  useEffect(() => {
+    if (!session?.user) {
+      setIsAdmin(false);
+      setRoleChecked(false);
+      return;
+    }
+    const checkRole = async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+      setRoleChecked(true);
+    };
+    checkRole();
+  }, [session]);
+
+  if (loading || (session && !roleChecked)) {
     return <div className="flex min-h-screen items-center justify-center bg-background"><p>Загрузка...</p></div>;
+  }
+
+  if (session && !isAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Card className="w-full max-w-sm">
+          <CardHeader><CardTitle>Доступ запрещён</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">У вашего аккаунта нет прав администратора.</p>
+            <Button variant="outline" className="w-full" onClick={() => supabase.auth.signOut()}>
+              <LogOut className="mr-1 h-4 w-4" /> Выйти
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (!session) {
