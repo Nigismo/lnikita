@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import SplineScene from "@/components/SplineScene";
+import ShaderBackground from "@/components/ui/shader-background";
 
 const HeroSection = () => {
   return (
@@ -36,18 +36,15 @@ const HeroSection = () => {
           </div>
         </motion.div>
 
-        {/* 3D Scene */}
+        {/* Shader background */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative hidden h-[500px] lg:block"
+          className="relative h-[320px] overflow-hidden rounded-2xl sm:h-[400px] lg:h-[500px]"
         >
+          <ShaderBackground className="block h-full w-full" />
           <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-transparent" />
-          <SplineScene
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            className="h-full w-full"
-          />
         </motion.div>
       </div>
 
