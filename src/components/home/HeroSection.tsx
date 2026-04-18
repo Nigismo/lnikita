@@ -6,13 +6,19 @@ import ShaderBackground from "@/components/ui/shader-background";
 const HeroSection = () => {
   return (
     <section className="relative overflow-hidden">
-      <div className="container grid min-h-[85vh] items-center gap-8 py-20 lg:grid-cols-2">
-        {/* Text */}
+      {/* Shader background covering the whole section */}
+      <div className="absolute inset-0 z-0">
+        <ShaderBackground className="block h-full w-full" />
+        {/* Gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/40 md:from-background/85 md:via-background/55 md:to-background/20" />
+      </div>
+
+      <div className="container relative z-10 flex min-h-[85vh] items-center py-20">
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
-          className="relative z-10"
+          className="max-w-2xl"
         >
           <span className="mb-4 inline-block rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary">
             Онлайн-курсы на Stepik
@@ -35,21 +41,7 @@ const HeroSection = () => {
             </Button>
           </div>
         </motion.div>
-
-        {/* Shader background */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative h-[320px] overflow-hidden rounded-2xl sm:h-[400px] lg:h-[500px]"
-        >
-          <ShaderBackground className="block h-full w-full" />
-          <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-transparent to-transparent" />
-        </motion.div>
       </div>
-
-      {/* Gradient backdrop */}
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-[120px]" />
     </section>
   );
 };
