@@ -1,22 +1,56 @@
 
 
-## План: Shader-анимация фоном всей Hero-секции
+## План: Исправление 4 проблем безопасности
 
-### Что меняется
-Сейчас shader находится в правой колонке grid'а в виде «окошка» с закруглёнными углами. Сделаем его фоном всей Hero-секции — анимация будет занимать весь верхний экран, а текст ляжет поверх неё.
+### 1. `user_roles` — любой аутентифицированный читает все роли (error)
+Заменить SELECT-политику с `USING (true)` на проверку: пользователь видит **только свою** роль (`auth.uid() = user_id`). Этого достаточно для проверки админ-доступа в `Admin.tsx` (запрос идёт с фильтром `eq("user_id", session.user.id)`).
 
-### Изменения в `src/components/home/HeroSection.tsx`
-- Убрать двухколоночный grid (`lg:grid-cols-2`), оставить одну колонку с текстом
-- Добавить `<ShaderBackground />` как абсолютный фон секции (`absolute inset-0 -z-0`)
-- Добавить полупрозрачный градиент-оверлей поверх shader'а для читаемости текста (`bg-gradient-to-r from-background/85 via-background/60 to-background/30` на десктопе, более плотный на мобильных)
-- Текст — в `relative z-10`, выровнен слева, ограничен по ширине (`max-w-2xl`)
-- Высоту секции оставить `min-h-[85vh]`
-- Удалить старый «окошечный» motion.div со shader'ом и градиентную подложку справа
+### 2. `blog-images` — любой аутентифицированный может загружать/удалять (warn)
+Создать (или заменить) storage-политики для bucket `blog-images`:
+- **INSERT**, **UPDATE**, **DELETE** — только для `has_role(auth.uid(), 'admin')`
+- **SELECT** — оставить публичным (картинки нужны всем для отображения блога), но ограничить буфером `blog-images`, чтобы устранить и проблему #4
 
-### Без изменений
-- `shader-background.tsx` — он уже подстраивается под родительский контейнер через ResizeObserver
-- Остальные секции, тема, цвета
+### 3. Public Bucket Allows Listing (warn)
+Решается вместе с #2: SELECT-политика на `storage.objects` будет ограничена `bucket_id = 'blog-images'`, без права листинга через storage API (публичный доступ к отдельным файлам по URL сохранится).
 
-### Файлы
-- Изменить: `src/components/home/HeroSection.tsx`
+### 4. Leaked Password Protection Disabled (warn)
+Включить HIBP-проверку паролей через настройки auth (`password_hibp_enabled: true`). Это автоматически блокирует регистрацию/смену пароля на скомпрометированные пароли.
+
+### Изменения
+
+**Миграция (схема):**
+```sql
+-- user_roles: заменить SELECT-политику
+DROP POLICY "Admins can read user_roles" ON public.user_roles;
+CREATE POLICY "Users can read their own roles"
+  ON public.user_roles FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
+
+-- storage.objects для blog-images: пересоздать политики
+DROP POLICY IF EXISTS <existing blog-images policies>;
+
+CREATE POLICY "Public can view blog images"
+  ON storage.objects FOR SELECT TO public
+  USING (bucket_id = 'blog-images');
+
+CREATE POLICY "Admins can upload blog images"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'blog-images' AND has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update blog images"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'blog-images' AND has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete blog images"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'blog-images' AND has_role(auth.uid(), 'admin'));
+```
+
+**Auth-настройка:** Включить `password_hibp_enabled` через configure_auth.
+
+### Файлы кода
+Изменения в коде **не требуются** — текущая логика в `Admin.tsx` и `AdminBlogTab.tsx` работает с этими политиками без изменений (admin при заходе проходит проверку, картинки в блоге грузятся по публичным URL).
+
+### Результат
+Все 4 предупреждения безопасности будут устранены.
 
