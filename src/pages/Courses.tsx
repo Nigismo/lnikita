@@ -7,9 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { useCourses } from "@/hooks/useCourses";
 import { getIconByName } from "@/lib/icons";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const Courses = () => {
   const { courses, isLoading } = useCourses();
+
+  useDocumentMeta({
+    title: "Все курсы — EduPro",
+    description:
+      "Каталог онлайн-курсов EduPro: Excel, веб-разработка, Telegram SMM, Яндекс Директ. Бессрочный доступ на Stepik, практика и сертификаты.",
+    path: "/courses",
+  });
 
   return (
     <div className="min-h-screen">

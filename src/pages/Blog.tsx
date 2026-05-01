@@ -11,6 +11,7 @@ const Blog = () => {
   useDocumentMeta({
     title: "Блог — EduPro",
     description: "Полезные статьи по Excel, веб-разработке и цифровым навыкам.",
+    path: "/blog",
   });
 
   return (
