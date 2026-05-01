@@ -42,9 +42,14 @@ const CoursePage = () => {
     ? `${window.location.origin}/courses/${course.slug}`
     : undefined;
 
+  // Mark page as noindex while course is loading or when slug doesn't match
+  // any course (avoids indexing empty/404-bound pages).
+  const shouldNoindex = isLoading || !course;
+
   useDocumentMeta({
-    title: seoTitle,
+    title: shouldNoindex ? "Курс не найден | EduPro" : seoTitle,
     description: trimmedDescription,
+    noindex: shouldNoindex,
   });
 
   // Canonical link + JSON-LD structured data for the course
