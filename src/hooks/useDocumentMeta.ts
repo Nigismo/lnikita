@@ -4,9 +4,11 @@ interface DocumentMeta {
   title: string;
   description?: string;
   ogImage?: string;
+  /** When true, sets <meta name="robots" content="noindex, nofollow"> */
+  noindex?: boolean;
 }
 
-export function useDocumentMeta({ title, description, ogImage }: DocumentMeta) {
+export function useDocumentMeta({ title, description, ogImage, noindex }: DocumentMeta) {
   useEffect(() => {
     document.title = title;
 
@@ -37,8 +39,21 @@ export function useDocumentMeta({ title, description, ogImage }: DocumentMeta) {
     setMeta("og:description", description);
     setMeta("og:image", ogImage);
 
+    // Robots: explicit index/noindex on every page that uses the hook
+    const robotsContent = noindex ? "noindex, nofollow" : "index, follow";
+    let robotsEl = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    if (!robotsEl) {
+      robotsEl = document.createElement("meta");
+      robotsEl.setAttribute("name", "robots");
+      document.head.appendChild(robotsEl);
+    }
+    robotsEl.setAttribute("content", robotsContent);
+
     return () => {
       document.title = "EduPro";
+      // Reset robots to default index, follow when unmounting a noindex page
+      const existingRobots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+      if (existingRobots) existingRobots.setAttribute("content", "index, follow");
     };
-  }, [title, description, ogImage]);
+  }, [title, description, ogImage, noindex]);
 }
