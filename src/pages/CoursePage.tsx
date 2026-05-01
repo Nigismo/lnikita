@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Star, CheckCircle2 } from "lucide-react";
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/accordion";
 import { useCourses } from "@/hooks/useCourses";
 import { getIconByName } from "@/lib/icons";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -24,6 +26,73 @@ const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { courses, isLoading } = useCourses();
   const course = courses.find((c) => c.slug === slug);
+
+  const seoTitle = course
+    ? `${course.title} — онлайн-курс | EduPro`.slice(0, 60)
+    : "Курс | EduPro";
+  const seoDescription = course
+    ? (course.tagline ? `${course.tagline}. ` : "") + course.description
+    : undefined;
+  const trimmedDescription = seoDescription
+    ? seoDescription.length > 158
+      ? seoDescription.slice(0, 155).trimEnd() + "…"
+      : seoDescription
+    : undefined;
+  const canonicalUrl = course
+    ? `${window.location.origin}/courses/${course.slug}`
+    : undefined;
+
+  useDocumentMeta({
+    title: seoTitle,
+    description: trimmedDescription,
+  });
+
+  // Canonical link + JSON-LD structured data for the course
+  useEffect(() => {
+    if (!course || !canonicalUrl) return;
+
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", canonicalUrl);
+
+    const ldId = "course-jsonld";
+    let ld = document.getElementById(ldId) as HTMLScriptElement | null;
+    if (!ld) {
+      ld = document.createElement("script");
+      ld.type = "application/ld+json";
+      ld.id = ldId;
+      document.head.appendChild(ld);
+    }
+    ld.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Course",
+      name: course.title,
+      description: trimmedDescription,
+      url: canonicalUrl,
+      inLanguage: "ru",
+      provider: {
+        "@type": "Organization",
+        name: "EduPro",
+        sameAs: window.location.origin,
+      },
+      hasCourseInstance: course.link
+        ? {
+            "@type": "CourseInstance",
+            courseMode: "online",
+            url: course.link,
+          }
+        : undefined,
+    });
+
+    return () => {
+      const existing = document.getElementById(ldId);
+      if (existing) existing.remove();
+    };
+  }, [course, canonicalUrl, trimmedDescription]);
 
   if (isLoading) {
     return (
