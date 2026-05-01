@@ -15,6 +15,7 @@ import {
 import { useCourses } from "@/hooks/useCourses";
 import { getIconByName } from "@/lib/icons";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { SITE_URL } from "@/lib/site";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -38,9 +39,8 @@ const CoursePage = () => {
       ? seoDescription.slice(0, 155).trimEnd() + "…"
       : seoDescription
     : undefined;
-  const canonicalUrl = course
-    ? `${window.location.origin}/courses/${course.slug}`
-    : undefined;
+  const coursePath = course ? `/courses/${course.slug}` : undefined;
+  const canonicalUrl = coursePath ? `${SITE_URL}${coursePath}` : undefined;
 
   // Mark page as noindex while course is loading or when slug doesn't match
   // any course (avoids indexing empty/404-bound pages).
@@ -49,20 +49,13 @@ const CoursePage = () => {
   useDocumentMeta({
     title: shouldNoindex ? "Курс не найден | EduPro" : seoTitle,
     description: trimmedDescription,
+    path: coursePath,
     noindex: shouldNoindex,
   });
 
-  // Canonical link + JSON-LD structured data for the course
+  // JSON-LD structured data for the course (canonical handled by useDocumentMeta)
   useEffect(() => {
     if (!course || !canonicalUrl) return;
-
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.setAttribute("rel", "canonical");
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute("href", canonicalUrl);
 
     const ldId = "course-jsonld";
     let ld = document.getElementById(ldId) as HTMLScriptElement | null;
@@ -82,7 +75,7 @@ const CoursePage = () => {
       provider: {
         "@type": "Organization",
         name: "EduPro",
-        sameAs: window.location.origin,
+        sameAs: SITE_URL,
       },
       hasCourseInstance: course.link
         ? {
@@ -98,6 +91,7 @@ const CoursePage = () => {
       if (existing) existing.remove();
     };
   }, [course, canonicalUrl, trimmedDescription]);
+
 
   if (isLoading) {
     return (
