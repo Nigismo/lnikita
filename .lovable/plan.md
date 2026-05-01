@@ -1,56 +1,31 @@
+## План: Добавить курс «Яндекс Директ 2026: нейросети и performance-маркетинг»
 
+### Что делаем
+Добавляем новый, четвёртый продвигаемый Stepik-курс (ID 281410) в таблицу `courses` через прямой INSERT. Курсы хранятся в Supabase и автоматически отображаются на главной (`CourseCards`) и странице `/courses`, а детальная страница рендерится по slug через `CoursePage`.
 
-## План: Исправление 4 проблем безопасности
+### Контент курса (со страницы Stepik)
+- **slug:** `yandex-direct-2026`
+- **title:** Яндекс Директ 2026: нейросети и performance-маркетинг
+- **tagline:** Управляйте алгоритмами, а не ставками — реклама на результат
+- **icon_name:** `Target` (уже есть в `src/lib/icons.ts`)
+- **link:** `https://stepik.org/course/281410/promo`
+- **sort_order:** 3 (после трёх существующих)
+- **description:** короткое описание про performance-маркетинг 2026, работу с алгоритмами, экономику рекламы и нейросети
+- **benefits** (6 карточек): автостратегии, экономика (CPA/ROMI), нейросети для креативов, защита от фрода, автотаргетинг, юридическая безопасность (ОРД/erid)
+- **audience** (3): новички в digital, предприниматели и владельцы малого бизнеса, маркетологи «старой школы»
+- **requirements** (3): уверенный ПК, базовая математика (проценты), опыт в маркетинге не требуется
+- **curriculum** (8 модулей со страницы): Введение в performance, Экономика рекламы, Инфраструктура (Метрика/фрод), Семантика и автотаргетинг, Креативы и нейросети, Настройка ЕПК и Мастер кампаний, Оптимизация и масштабирование, Работа директологом и юр. безопасность
+- **course_testimonials:** `[]` (на Stepik отзывов в готовом виде нет)
+- **course_faq** (3): про рассрочку, оплату от компании, возврат за 30 дней
 
-### 1. `user_roles` — любой аутентифицированный читает все роли (error)
-Заменить SELECT-политику с `USING (true)` на проверку: пользователь видит **только свою** роль (`auth.uid() = user_id`). Этого достаточно для проверки админ-доступа в `Admin.tsx` (запрос идёт с фильтром `eq("user_id", session.user.id)`).
+### Реализация
+Один INSERT через инструмент `supabase--insert` в таблицу `public.courses`. Все JSONB-поля заполняются массивами объектов нужной структуры (см. интерфейсы `CourseBenefitDB`, `CourseAudienceDB`, `CurriculumModuleDB`, `CourseFAQDB` в `src/hooks/useCourses.ts`).
 
-### 2. `blog-images` — любой аутентифицированный может загружать/удалять (warn)
-Создать (или заменить) storage-политики для bucket `blog-images`:
-- **INSERT**, **UPDATE**, **DELETE** — только для `has_role(auth.uid(), 'admin')`
-- **SELECT** — оставить публичным (картинки нужны всем для отображения блога), но ограничить буфером `blog-images`, чтобы устранить и проблему #4
-
-### 3. Public Bucket Allows Listing (warn)
-Решается вместе с #2: SELECT-политика на `storage.objects` будет ограничена `bucket_id = 'blog-images'`, без права листинга через storage API (публичный доступ к отдельным файлам по URL сохранится).
-
-### 4. Leaked Password Protection Disabled (warn)
-Включить HIBP-проверку паролей через настройки auth (`password_hibp_enabled: true`). Это автоматически блокирует регистрацию/смену пароля на скомпрометированные пароли.
-
-### Изменения
-
-**Миграция (схема):**
-```sql
--- user_roles: заменить SELECT-политику
-DROP POLICY "Admins can read user_roles" ON public.user_roles;
-CREATE POLICY "Users can read their own roles"
-  ON public.user_roles FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
-
--- storage.objects для blog-images: пересоздать политики
-DROP POLICY IF EXISTS <existing blog-images policies>;
-
-CREATE POLICY "Public can view blog images"
-  ON storage.objects FOR SELECT TO public
-  USING (bucket_id = 'blog-images');
-
-CREATE POLICY "Admins can upload blog images"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'blog-images' AND has_role(auth.uid(), 'admin'));
-
-CREATE POLICY "Admins can update blog images"
-  ON storage.objects FOR UPDATE TO authenticated
-  USING (bucket_id = 'blog-images' AND has_role(auth.uid(), 'admin'));
-
-CREATE POLICY "Admins can delete blog images"
-  ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'blog-images' AND has_role(auth.uid(), 'admin'));
-```
-
-**Auth-настройка:** Включить `password_hibp_enabled` через configure_auth.
+### Также обновить
+- `mem://features/stepik-courses` — добавить четвёртый ID (281410, Яндекс Директ).
 
 ### Файлы кода
-Изменения в коде **не требуются** — текущая логика в `Admin.tsx` и `AdminBlogTab.tsx` работает с этими политиками без изменений (admin при заходе проходит проверку, картинки в блоге грузятся по публичным URL).
+Изменения в коде **не требуются** — курсы загружаются динамически из Supabase, иконка `Target` уже доступна, страница `/courses/yandex-direct-2026` заработает автоматически.
 
 ### Результат
-Все 4 предупреждения безопасности будут устранены.
-
+На главной появится 4-я карточка курса, страница курса будет доступна по `/courses/yandex-direct-2026`, кнопка «Записаться» ведёт на Stepik.
