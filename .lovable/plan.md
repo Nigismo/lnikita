@@ -1,35 +1,36 @@
-## План: robots.txt и sitemap.xml
-
-### Текущее состояние
-- В БД 4 курса: `excel`, `web-dev`, `telegram-smm`, `yandex-direct-2026`.
-- Опубликованных постов блога: 2 (`kak-nachat-s-excel` от 2024-12-15, `cms-dlya-sayta` от 2025-01-20).
-- Маршруты приложения: `/`, `/courses`, `/courses/:slug`, `/blog`, `/blog/:slug`, `/contact`, `/admin`, `*` (404).
-- `public/robots.txt` есть, но без `Sitemap:` и без запрета админки.
-- `public/sitemap.xml` отсутствует.
-- Боевой домен: `https://lnikita.lovable.app`.
+## План: SEO-мета на ключевые страницы + VITE_SITE_URL для canonical/OG
 
 ### Что делаем
 
-**1. Перезаписать `public/robots.txt`:**
-- Разрешить индексацию всем (`User-agent: *`, `Allow: /`).
-- Запретить `/admin`, `/admin/`, `/auth`, `/404`.
-- Указать `Sitemap: https://lnikita.lovable.app/sitemap.xml`.
+**1. Новый модуль `src/lib/site.ts`**
+- Экспорт `SITE_URL` = `import.meta.env.VITE_SITE_URL` с фолбэком на `https://lnikita.lovable.app` (хардкод для preview/локалки).
+- `DEFAULT_OG_IMAGE` — константа с боевой OG-картинкой (та, что уже в `index.html`).
+- Утилита `buildCanonical(path)` для удобства.
 
-**2. Создать `public/sitemap.xml`** со всеми публичными URL:
-- Главная `/` (priority 1.0, changefreq weekly)
-- `/courses`, `/blog` (0.9 / 0.8, weekly)
-- `/contact` (0.6, monthly)
-- 4 страницы курсов `/courses/{slug}` (0.8, monthly)
-- 2 поста блога `/blog/{slug}` с `<lastmod>` из поля `date` (0.7, monthly)
-- Админ, 404, auth — НЕ включаем.
+**2. Расширить `src/hooks/useDocumentMeta.ts`**
+- Добавить параметры `path?: string` и автоматически выставлять `<link rel="canonical">` и `og:url` через `SITE_URL + path`.
+- Автоматически выставлять `og:image`, `twitter:image`, `twitter:title`, `twitter:description`, `twitter:card`, `og:type=website` (с фолбэком на `DEFAULT_OG_IMAGE`).
+- Сохранить логику `noindex` (уже есть).
 
-### Замечание про автообновление
-Sitemap — статический файл. При добавлении нового курса/поста через админку он не обновится автоматически. Варианты на будущее (не делаем сейчас, если не попросишь):
-- Эдж-функция `sitemap` в Supabase, которая отдаёт XML из БД на лету (нужен rewrite в `vite.config.ts` или прокси).
-- Скрипт пресборки, читающий БД и генерирующий `public/sitemap.xml` перед `vite build`.
+**3. Подключить SEO на страницах**
+- **`src/pages/Index.tsx` (главная):** title «EduPro — онлайн-курсы по Excel, веб-разработке, SMM и Яндекс Директ», description, `path: "/"`.
+- **`src/pages/Courses.tsx`:** title «Все курсы — EduPro», описание, `path: "/courses"`.
+- **`src/pages/Blog.tsx`:** уже есть `useDocumentMeta` — добавить `path: "/blog"`.
+- **`src/pages/BlogPost.tsx`:** уже есть мета — добавить `path: \`/blog/${slug}\``, `noindex` если `!post && !isLoading`.
+- **`src/pages/CoursePage.tsx`:** убрать `window.location.origin`, перевести canonical и JSON-LD `url`/`provider.sameAs` на `SITE_URL` через `path: \`/courses/${slug}\``. JSON-LD-эффект упростить (используем `SITE_URL` вместо `window`).
 
-Пока — статический файл с актуальным контентом из БД.
+**4. `index.html`:** заменить `<html lang="en">` → `<html lang="ru">`. Жёсткие OG/Twitter мета в `<head>` оставляем как фолбэк для ботов, которые не выполняют JS (главная страница).
+
+### О переменной VITE_SITE_URL
+Vite читает её из `.env` на этапе сборки. Файл `.env` управляется автоматически (Lovable не позволяет редактировать его вручную), поэтому:
+- по умолчанию работает фолбэк `https://lnikita.lovable.app` — это и нужно для прода;
+- если в будущем подключишь кастомный домен, нужно будет добавить `VITE_SITE_URL=https://your-domain.ru` через настройки проекта.
 
 ### Файлы
-- Перезаписать: `public/robots.txt`
-- Создать: `public/sitemap.xml`
+- Создать: `src/lib/site.ts`
+- Изменить: `src/hooks/useDocumentMeta.ts`, `src/pages/Index.tsx`, `src/pages/Courses.tsx`, `src/pages/Blog.tsx`, `src/pages/BlogPost.tsx`, `src/pages/CoursePage.tsx`, `index.html`
+
+### Результат
+- На каждой публичной странице: правильный `<title>`, description, canonical на боевой домен, og:url, og:image, twitter card.
+- Превью ссылок в Telegram/VK работают на всех страницах (а не только на главной).
+- Canonical больше не «прыгает» между preview-доменом Lovable и боевым.

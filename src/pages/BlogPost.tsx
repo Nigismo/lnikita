@@ -10,11 +10,14 @@ const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { posts, isLoading } = useBlogPosts(false);
   const post = posts.find((p) => p.slug === slug);
+  const notFound = !isLoading && !post;
 
   useDocumentMeta({
-    title: post ? `${post.title} — EduPro` : "Блог — EduPro",
+    title: post ? `${post.title} — EduPro` : "Статья не найдена — EduPro",
     description: post?.description,
     ogImage: post?.cover_image ?? undefined,
+    path: post ? `/blog/${post.slug}` : undefined,
+    noindex: notFound || isLoading,
   });
 
   if (isLoading) {
