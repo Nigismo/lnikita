@@ -9,7 +9,10 @@ interface DocumentMeta {
   path?: string;
   /** When true, sets <meta name="robots" content="noindex, nofollow"> */
   noindex?: boolean;
+  /** OpenGraph type — defaults to "website". */
+  type?: "website" | "article";
 }
+
 
 function upsertMetaByProperty(property: string, content: string) {
   let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
