@@ -78,5 +78,5 @@ export function useDocumentMeta({ title, description, ogImage, path, noindex, ty
       const robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
       if (robots) robots.setAttribute("content", "index, follow");
     };
-  }, [title, description, ogImage, path, noindex]);
+  }, [title, description, ogImage, path, noindex, type]);
 }
