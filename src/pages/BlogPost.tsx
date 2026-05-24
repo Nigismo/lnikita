@@ -20,6 +20,7 @@ const BlogPost = () => {
     ogImage: post?.cover_image ?? undefined,
     path: post ? `/blog/${post.slug}` : undefined,
     noindex: notFound || isLoading,
+    type: "article",
   });
 
   // JSON-LD Article schema

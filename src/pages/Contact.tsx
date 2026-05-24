@@ -2,8 +2,15 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { MessageCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 const Contact = () => {
+  useDocumentMeta({
+    title: "Контакты — EduPro",
+    description: "Свяжитесь с Никитой Любавиным в Telegram: вопросы по курсам, сотрудничество и консультации.",
+    path: "/contact",
+  });
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
