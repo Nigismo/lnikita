@@ -9,7 +9,10 @@ interface DocumentMeta {
   path?: string;
   /** When true, sets <meta name="robots" content="noindex, nofollow"> */
   noindex?: boolean;
+  /** OpenGraph type — defaults to "website". */
+  type?: "website" | "article";
 }
+
 
 function upsertMetaByProperty(property: string, content: string) {
   let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
@@ -41,7 +44,7 @@ function upsertCanonical(href: string) {
   el.setAttribute("href", href);
 }
 
-export function useDocumentMeta({ title, description, ogImage, path, noindex }: DocumentMeta) {
+export function useDocumentMeta({ title, description, ogImage, path, noindex, type = "website" }: DocumentMeta) {
   useEffect(() => {
     document.title = title;
 
@@ -53,12 +56,13 @@ export function useDocumentMeta({ title, description, ogImage, path, noindex }: 
 
     upsertMetaByProperty("og:title", title);
     upsertMetaByName("twitter:title", title);
-    upsertMetaByProperty("og:type", "website");
+    upsertMetaByProperty("og:type", type);
 
     const image = ogImage || DEFAULT_OG_IMAGE;
     upsertMetaByProperty("og:image", image);
     upsertMetaByName("twitter:image", image);
     upsertMetaByName("twitter:card", "summary_large_image");
+
 
     if (path) {
       const canonical = `${SITE_URL}${path.startsWith("/") ? path : "/" + path}`;
@@ -74,5 +78,5 @@ export function useDocumentMeta({ title, description, ogImage, path, noindex }: 
       const robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
       if (robots) robots.setAttribute("content", "index, follow");
     };
-  }, [title, description, ogImage, path, noindex]);
+  }, [title, description, ogImage, path, noindex, type]);
 }
