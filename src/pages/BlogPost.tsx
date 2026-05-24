@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -5,6 +6,7 @@ import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { ArrowLeft, CalendarDays } from "lucide-react";
+import { SITE_URL } from "@/lib/site";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,6 +21,50 @@ const BlogPost = () => {
     path: post ? `/blog/${post.slug}` : undefined,
     noindex: notFound || isLoading,
   });
+
+  // JSON-LD Article schema
+  useEffect(() => {
+    if (!post) return;
+
+    const ldId = "blogpost-jsonld";
+    let ld = document.getElementById(ldId) as HTMLScriptElement | null;
+    if (!ld) {
+      ld = document.createElement("script");
+      ld.type = "application/ld+json";
+      ld.id = ldId;
+      document.head.appendChild(ld);
+    }
+
+    ld.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: post.description,
+      image: post.cover_image ? [post.cover_image] : undefined,
+      datePublished: post.date,
+      author: {
+        "@type": "Person",
+        name: "Никита Любавин",
+        url: SITE_URL,
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "EduPro",
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/logo.png`,
+        },
+      },
+      url: `${SITE_URL}/blog/${post.slug}`,
+      inLanguage: "ru",
+    });
+
+    return () => {
+      const existing = document.getElementById(ldId);
+      if (existing) existing.remove();
+    };
+  }, [post]);
+
 
   if (isLoading) {
     return (

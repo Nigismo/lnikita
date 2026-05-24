@@ -57,15 +57,15 @@ const CoursePage = () => {
   useEffect(() => {
     if (!course || !canonicalUrl) return;
 
-    const ldId = "course-jsonld";
-    let ld = document.getElementById(ldId) as HTMLScriptElement | null;
-    if (!ld) {
-      ld = document.createElement("script");
-      ld.type = "application/ld+json";
-      ld.id = ldId;
-      document.head.appendChild(ld);
+    const courseLdId = "course-jsonld";
+    let courseLd = document.getElementById(courseLdId) as HTMLScriptElement | null;
+    if (!courseLd) {
+      courseLd = document.createElement("script");
+      courseLd.type = "application/ld+json";
+      courseLd.id = courseLdId;
+      document.head.appendChild(courseLd);
     }
-    ld.textContent = JSON.stringify({
+    courseLd.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Course",
       name: course.title,
@@ -86,11 +86,39 @@ const CoursePage = () => {
         : undefined,
     });
 
+    const faqLdId = "course-faq-jsonld";
+    let faqLd = document.getElementById(faqLdId) as HTMLScriptElement | null;
+    if (course.course_faq.length > 0) {
+      if (!faqLd) {
+        faqLd = document.createElement("script");
+        faqLd.type = "application/ld+json";
+        faqLd.id = faqLdId;
+        document.head.appendChild(faqLd);
+      }
+      faqLd.textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: course.course_faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: f.a,
+          },
+        })),
+      });
+    } else if (faqLd) {
+      faqLd.remove();
+    }
+
     return () => {
-      const existing = document.getElementById(ldId);
-      if (existing) existing.remove();
+      const existingCourse = document.getElementById(courseLdId);
+      if (existingCourse) existingCourse.remove();
+      const existingFaq = document.getElementById(faqLdId);
+      if (existingFaq) existingFaq.remove();
     };
   }, [course, canonicalUrl, trimmedDescription]);
+
 
 
   if (isLoading) {
